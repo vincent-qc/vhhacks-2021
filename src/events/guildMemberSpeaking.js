@@ -35,41 +35,40 @@ class GuildMemberSpeakingEvent extends Event {
 		if (member.guild.voice && member.guild.voice.channelID !== member.voice.channelID) return;
 
 		const connection = member.guild.voice?.connection ?? (await member.voice.channel.join());
+
 		// Play a short silence frame so Discord lets us receive audio.
 		connection.play(new Silence(), { type: 'opus' });
 
 		const audio = connection.receiver.createStream(member, { mode: 'pcm' });
 
-		let chunks = [];
+		// Array of buffers received.
+		const chunks = [];
 		audio
 			.on('data', (chunk) => chunks.push(chunk))
 			.on('end', async () => {
+				// Convert stereo audio to mono audio - Google speech to text wants mono.
 				const buffer = this.convertStereoToMono(Buffer.concat(chunks));
 
-				const audio = {
-					content: buffer.toString('base64'),
-				};
+				const audio = { content: buffer.toString('base64') };
 				const config = {
 					encoding: 'LINEAR16',
 					sampleRateHertz: 48000,
 					languageCode: 'en-US',
 				};
-				const request = { audio, config };
 
 				// @ts-expect-error
-				const [response] = await speechClient.recognize(request);
-				console.log(response);
-				const c = this.client.channels.cache.get('825168243043336256');
+				const [response] = await speechClient.recognize({ audio, config });
+
+				// TODO: Change this to a configurable log channel
+				const channel = this.client.channels.cache.get('825168243043336256');
 				const transcript = response.results.map((result) => result.alternatives[0].transcript).join('\n');
-				if (transcript.length) c.send(`Transcript: ${transcript}`);
 
-				// @ts-expect-error
-				c.send(new MessageAttachment(buffer, 'recording.pcm'));
+				// @ts-expect-error - Channel must be a text channel.
+				if (transcript.length) channel.send(`Transcript: ${transcript}`);
 			});
 	}
 
-	// https://github.com/healzer/DiscordEarsBot/blob/master/index.js#L37
-	// MIT License
+	// https://dev.to/codr/raw-stereo-audio-to-mono-channel-113a
 	convertStereoToMono(buffer) {
 		try {
 			const data = new Int16Array(buffer);

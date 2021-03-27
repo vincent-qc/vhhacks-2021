@@ -32,9 +32,10 @@ class SchoolmasterClient extends Client {
 		await this.events.loadAll(join(__dirname, '..', 'events'));
 		console.log(`Loaded ${this.events.registry.size} events!`);
 
-		this.slashCreator.registerCommandsIn(join(__dirname, '..', 'commands'));
-		this.slashCreator.on('debug', console.log);
-		this.slashCreator.syncCommands();
+		this.slashCreator
+			.registerCommandsIn(join(__dirname, '..', 'commands'))
+			.on('debug', (msg) => console.log(`[SlashCreator] Debug log: `, msg))
+			.syncCommands();
 		console.log(`Loaded and synced ${this.slashCreator.commands.size} commands!`);
 
 		return this.login(process.env.TOKEN);
