@@ -23,7 +23,8 @@ class EventHandler {
 				mod = new Constructor();
 				if (!(mod instanceof Event)) throw new Error(`No known event exported from '${path}'`);
 			} catch (error) {
-				throw new Error(`Error creating event at path '${path}'`);
+				delete require.cache[require.resolve(path)];
+				continue;
 			}
 			this.registry.set(mod.id, mod);
 
