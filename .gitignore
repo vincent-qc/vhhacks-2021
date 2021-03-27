@@ -17,3 +17,11 @@
 .AppleDesktop
 Network Trash Folder
 Temporary Items
+
+# Others
+
+node_modules
+
+database.env
+.env
+credentials/google-credentials.json

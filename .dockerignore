@@ -1,0 +1,16 @@
+pnpm-debug.log*
+*.log
+
+node_modules
+
+.vscode
+
+LICENSE.md
+README.md
+
+.env
+database.env
+credentials/google-credentials.json
+
+.prettierignore
+.prettierrc.json

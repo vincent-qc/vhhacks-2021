@@ -1,0 +1,26 @@
+{
+  "name": "vhhacks-2021",
+  "version": "0.1.0",
+  "description": "Discord Bot to assist in the management of school servers, made for vhHacks 2021",
+  "main": "src/bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Crabo-7498/vhhacks-2021.git"
+  },
+  "author": "Joe L., Vincent Q.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Crabo-7498/vhhacks-2021/issues"
+  },
+  "homepage": "https://github.com/Crabo-7498/vhhacks-2021#readme",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "postgres": "^1.0.2"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
+  }
+}

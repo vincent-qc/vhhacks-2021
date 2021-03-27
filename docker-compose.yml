@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+	database:
+		image: postgres
+		restart: always
+		env_file:
+			- ./database.env
+		volumes:
+			- ./postgres_data:/var/lib/postgresql:rw
+		ports:
+			- '8001:5432'
+
+	bot:
+		build:
+			context: ./
+			dockerfile: Dockerfile
+		restart: always
+		env_file:
+			- .env
+		volumes:
+			# Bind mount our Google application credentials onto the container
+			- ./credentials:/usr/schoolmaster/credentials:ro
+
+volumes:
+	postgres_data:
+		name: postgres_data
+	
