@@ -3,34 +3,55 @@ const { Collection } = require('discord.js');
 const { readdir } = require('fs/promises');
 const { join } = require('path');
 
+const { walkDir } = require('../utils');
 const Event = require('./Event');
 
 class EventHandler {
-	/** @param client {import('discord.js').Client} */
+	/** @param client {import('../client/SchoolmasterClient')} */
 	constructor(client) {
 		this.client = client;
 		this.registry = new Collection();
 	}
 
-	/** @param directory {string} */
 	async loadAll(directory) {
-		for await (const path of EventHandler.walkDir(directory)) {
+		for await (const path of walkDir(directory)) {
+			console.log(`[EventHandler]: importing event from path '${path}'`);
 			const Constructor = require(path);
-			const mod = new Constructor();
-			mod.client = this.registry.set(mod.id, mod);
+
+			let mod;
+			try {
+				mod = new Constructor();
+				if (!(mod instanceof Event)) throw new Error(`No known event exported from '${path}'`);
+			} catch (error) {
+				throw new Error(`Error creating event at path '${path}'`);
+			}
+			this.registry.set(mod.id, mod);
+
+			mod.client = this.client;
+			mod.handler = this;
+
+			this.register(mod);
 		}
 	}
 
-	register(event) {}
-
-	/** @param directory {string} */
-	static async *walkDir(directory) {
-		const dirents = await readdir(directory, { withFileTypes: true });
-
-		for (const dirent of dirents) {
-			const path = join(directory, dirent.name);
-			if (dirent.isDirectory()) yield* this.walkDir(path);
-			else yield path;
+	register(mod) {
+		let emitter;
+		switch (mod.emitter) {
+			case 'client':
+				emitter = this.client;
+				break;
+			case 'ws':
+				emitter = this.client.ws;
+				break;
+			default:
+				throw new Error(`Unknown emitter for event '${mod.id}': ${mod.emitter}`);
 		}
+
+		if (mod.once) emitter.once(mod.event, (...args) => mod.exec(...args));
+		else emitter.on(mod.event, (...args) => mod.exec(...args));
+
+		console.log(`[EventHandler]: registered event '${mod.id}'`);
 	}
 }
+
+module.exports = EventHandler;

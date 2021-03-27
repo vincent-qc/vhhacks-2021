@@ -18,7 +18,8 @@
   "homepage": "https://github.com/Crabo-7498/vhhacks-2021#readme",
   "dependencies": {
     "discord.js": "^12.5.1",
-    "postgres": "^1.0.2"
+    "postgres": "^1.0.2",
+    "slash-commands": "^1.4.0"
   },
   "devDependencies": {
     "prettier": "^2.2.1"

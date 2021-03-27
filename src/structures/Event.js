@@ -1,5 +1,11 @@
 // @ts-check
 class Event {
+	/** @type {import('../client/SchoolmasterClient')} */
+	client;
+
+	/** @type {import('./EventHandler')} */
+	handler;
+
 	/**
 	 * @param id {string}
 	 * @param options {{ emitter?: string, event: string, once?: boolean }}

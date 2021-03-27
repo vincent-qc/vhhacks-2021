@@ -1,28 +1,31 @@
 version: '3'
 
 services:
-	database:
-		image: postgres
-		restart: always
-		env_file:
-			- ./database.env
-		volumes:
-			- ./postgres_data:/var/lib/postgresql:rw
-		ports:
-			- '8001:5432'
+  database:
+    hostname: database
+    image: postgres
+    restart: always
+    env_file:
+      - ./database.env
+    volumes:
+      - ./postgres_data:/var/lib/postgresql:rw
+    ports:
+      - '5432:5432'
 
-	bot:
-		build:
-			context: ./
-			dockerfile: Dockerfile
-		restart: always
-		env_file:
-			- .env
-		volumes:
-			# Bind mount our Google application credentials onto the container
-			- ./credentials:/usr/schoolmaster/credentials:ro
+  bot:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      # Bind mount our Google application credentials onto the container
+      - ./credentials:/usr/schoolmaster/credentials:ro
+    depends_on:
+      - database
+    command: ['./wait-for-it/wait-for-it.sh', 'database:5432', '--', 'dumb-init', 'node', 'src/bot.js']
 
 volumes:
-	postgres_data:
-		name: postgres_data
-	
+  postgres_data:
+    name: postgres_data
