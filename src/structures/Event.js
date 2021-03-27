@@ -17,7 +17,7 @@ class Event {
 		this.once = once;
 	}
 
-	exec() {
+	exec(...args) {
 		throw new Error('Event#exec() not implemented');
 	}
 }

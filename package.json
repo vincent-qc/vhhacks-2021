@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Crabo-7498/vhhacks-2021#readme",
   "dependencies": {
+    "@discordjs/opus": "^0.5.0",
     "@google-cloud/speech": "^4.4.0",
     "discord.js": "^12.5.1",
     "postgres": "^1.0.2",
