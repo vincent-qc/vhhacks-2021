@@ -9,15 +9,10 @@ class ReadyEvent extends Event {
 			event: 'ready',
 			once: true,
 		});
-
-		console.log(this.event);
 	}
 
-	async exec() {
+	exec() {
 		console.log(`Logged in as ${this.client.user.tag}!`);
-
-		const postgresVersion = await sql`SELECT version()`;
-		console.log("Result of 'SELECT version()'", postgresVersion);
 	}
 }
 
