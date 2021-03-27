@@ -30,10 +30,13 @@ class Command extends SlashCommand {
 		throw new Error('Command#exec() not implemented.');
 	}
 
-	/** @param ctx {EnhancedCommandContext')} */
+	/** @param ctx {EnhancedCommandContext} */
 	async runInhibitors(ctx) {
 		// Block if no guild
-		if (!ctx.guildID) return true;
+		if (!ctx.guildID) {
+			ctx.send('This command may only be used in a guild.', { ephemeral: true });
+			return true;
+		}
 
 		if (this.ownerOnly && !this.client.isOwner(ctx.user.id)) {
 			ctx.send('This command may only be used by owners.', { ephemeral: true });
@@ -49,6 +52,13 @@ class Command extends SlashCommand {
 		}
 
 		return false;
+	}
+
+	onError(err, ctx) {
+		console.log(`[Command] Error while running command:`, err);
+		if (!ctx.expired && !ctx.initiallyResponded) {
+			return ctx.send('An error occurred while running the command.', { ephemeral: true });
+		}
 	}
 }
 

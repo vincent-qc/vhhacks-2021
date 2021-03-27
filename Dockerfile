@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM node:15-alpine
 LABEL name="Schoolmaster"
 LABEL version="0.1.0"
 

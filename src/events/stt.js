@@ -1,4 +1,4 @@
-/*const speech = require('@google-cloud/speech');
+const speech = require('@google-cloud/speech');
 const fs = require('fs')
 const Event = require('../structures/Event');
 const client = new speech.SpeechClient();
@@ -40,4 +40,4 @@ class STTEvent extends Event {
 	}
 }
 
-module.exports = ReadyEvent;*/
+module.exports = ReadyEvent;

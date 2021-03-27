@@ -13,6 +13,7 @@ class EvalCommand extends Command {
 					type: CommandOptionType.STRING,
 					name: 'code',
 					description: 'Code to evaluate',
+					required: true,
 				},
 				{
 					type: CommandOptionType.BOOLEAN,
@@ -45,10 +46,10 @@ class EvalCommand extends Command {
 		try {
 			// @ts-expect-error
 			let result = eval(code);
-			const elapsedMs = Number(start - process.hrtime.bigint()) / 1_000_000;
+			const elapsedMs = Number(process.hrtime.bigint() - start) / 1_000_000;
 			ctx.send(`**Output:**${await this.process(result)}\n⏱️ ${elapsedMs.toFixed(5)}ms`);
 		} catch (error) {
-			const elapsedMs = Number(start - process.hrtime.bigint()) / 1_000_000;
+			const elapsedMs = Number(process.hrtime.bigint() - start) / 1_000_000;
 			ctx.send(
 				`**Error:**\n${await this.process(Reflect.has(error, 'stack') ? error.stack : error)}\n⏱️ ${elapsedMs.toFixed(
 					5,
