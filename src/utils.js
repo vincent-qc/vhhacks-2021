@@ -23,4 +23,22 @@ function randInt(low, high) {
 	return low + Math.round(Math.random() * diff);
 }
 
-module.exports = { walkDir, truncate, randInt };
+function getLevel(reputation) {
+	return Math.floor(Math.sqrt(reputation) / 50);
+}
+
+function getReputation(level) {
+	return 50 * level * level;
+}
+
+const units = ['K', 'M', 'B', 'T', 'q', 'Q', 'S'];
+function formatInt(int) {
+	if (int < 1000) return int;
+	const unitIdx = Math.floor(String(int).length / 3) - 1;
+	const unitSize = 10 ** (3 * unitIdx);
+
+	const wholePart = (int / unitSize).toPrecision(3);
+	return `${wholePart} ${units[unitIdx]}`;
+}
+
+module.exports = { walkDir, truncate, randInt, getLevel, getReputation, formatInt };

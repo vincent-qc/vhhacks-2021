@@ -7,7 +7,7 @@ const SchoolmasterSlashCreator = require('./SchoolmasterSlashCreator');
 const SettingsManager = require('../structures/SettingsManager');
 
 class SchoolmasterClient extends Client {
-	enableTranscription = false;
+	enableTranscription = true;
 	settingsManager = new SettingsManager();
 
 	constructor() {
@@ -29,7 +29,7 @@ class SchoolmasterClient extends Client {
 			// @ts-expect-error INTERACTION_CREATE is undocumented.
 			.withServer(new GatewayServer((handler) => this.ws.on('INTERACTION_CREATE', handler)));
 
-		this.ownerIds = process.env.OWNERS.split(',');
+		this.ownerIDs = process.env.OWNERS.split(',');
 	}
 
 	async start() {
@@ -42,15 +42,13 @@ class SchoolmasterClient extends Client {
 			.syncCommands();
 		console.log(`Loaded and synced ${this.slashCreator.commands.size} commands!`);
 
-		await this.settingsManager.init();
-
 		return this.login(process.env.TOKEN);
 	}
 
 	/** @param user {import('discord.js').UserResolvable} */
 	isOwner(user) {
 		const id = this.users.resolveID(user);
-		return this.ownerIds.includes(id);
+		return this.ownerIDs.includes(id);
 	}
 }
 

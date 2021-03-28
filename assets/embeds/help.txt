@@ -1,2 +1,0 @@
-[insert the funne help text]
-we can literally autogenerate the list of commands ._.

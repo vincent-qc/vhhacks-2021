@@ -19,13 +19,13 @@ class EvalCommand extends Command {
 					type: CommandOptionType.BOOLEAN,
 					name: 'async',
 					description: 'Whether the code should be interpreted as async',
-					default: false,
+					required: false,
 				},
 				{
 					type: CommandOptionType.BOOLEAN,
 					name: 'silent',
 					description: 'Whether or not command execution should be silent',
-					default: false,
+					required: false,
 				},
 			],
 			ownerOnly: true,
@@ -35,8 +35,7 @@ class EvalCommand extends Command {
 
 	/** @param ctx {import('../structures/EnhancedCommandContext')} */
 	async exec(ctx) {
-		const { async, silent } = ctx.options;
-		const code = async
+		const code = ctx.options.async
 			? `(async () => {
 			${ctx.options.code}
 		})();`
@@ -47,7 +46,7 @@ class EvalCommand extends Command {
 			// @ts-expect-error
 			let result = eval(code);
 			const elapsedMs = Number(process.hrtime.bigint() - start) / 1_000_000;
-			ctx.send(`**Output:**${await this.process(result)}\n⏱️ ${elapsedMs.toFixed(5)}ms`);
+			if (!ctx.options.silent) ctx.send(`**Output:**${await this.process(result)}\n⏱️ ${elapsedMs.toFixed(5)}ms`);
 		} catch (error) {
 			const elapsedMs = Number(process.hrtime.bigint() - start) / 1_000_000;
 			ctx.send(

@@ -18,9 +18,8 @@ class VoiceStateUpdateEvent extends Event {
 		if (oldState.channelID === newState.channelID) return;
 
 		const { guild } = newState;
-
-		// If we're in the old room and it's now empty, leave it.
-		if (guild.voice && guild.voice.channelID === oldState.channelID && oldState.channel.members.size === 0) {
+		// If only we are left:
+		if (guild.voice?.channel.members.size === 1) {
 			console.log(`[Voice] Just left ${oldState.channelID} as everyone left :(`);
 			guild.voice.channel.leave();
 		}

@@ -1,10 +1,11 @@
 // @ts-check
+const { MessageEmbed } = require('discord.js');
+
 class LazyPaginatedEmbed {
 	static EMOJIS = Object.freeze({
 		BACKWARD: '◀️',
 		STOP: '⏹️',
 		FORWARD: '▶️',
-		JUMP_TO: '🧮',
 	});
 	static ALL_EMOJIS = Object.values(LazyPaginatedEmbed.EMOJIS);
 
@@ -26,14 +27,8 @@ class LazyPaginatedEmbed {
 		return this;
 	}
 
-	/** @param {import('discord.js').TextChannel} channel */
-	async start(channel, userID) {
-		const initEmbed = await this.generator(this.page);
-		if (!initEmbed) throw new Error(`First page returned from LazyPaginatedEmbed#generator() was undefined.`);
-
-		const msg = await channel.send(initEmbed);
+	async start(msg, userID) {
 		for (const emoji of LazyPaginatedEmbed.ALL_EMOJIS) await msg.react(emoji);
-
 		const collector = await msg.createReactionCollector(
 			(reaction, user) => LazyPaginatedEmbed.ALL_EMOJIS.includes(reaction.emoji.name) && user.id === userID,
 			{
@@ -41,15 +36,38 @@ class LazyPaginatedEmbed {
 			},
 		);
 
-		collector.on('collect', async (reaction) => {
+		let last = -1;
+		collector.on('collect', async (reaction, user) => {
+			// very scuffed throttling thingy to make sure users don't spam the thing :P
+			const now = Date.now();
+			if (now - last < 1500) return;
+			last = now;
+
 			switch (reaction.emoji.name) {
 				case LazyPaginatedEmbed.EMOJIS.BACKWARD: {
 					if (this.page === 0) return;
-					const embed = await this.generator(this.page - 1);
-					if (!embed) return;
+					const cacheEmbed = this.cache.get(this.page - 1);
+					const embed = cacheEmbed ?? (await this.generator(this.page - 1));
+					if (!cacheEmbed) this.cache.set(this.page - 1, cacheEmbed);
+					if (!embed) return reaction.users.remove(user);
 
 					--this.page;
 					msg.edit(embed);
+					return reaction.users.remove(user);
+				}
+				case LazyPaginatedEmbed.EMOJIS.STOP: {
+					msg.reactions.removeAll();
+					return collector.stop();
+				}
+				case LazyPaginatedEmbed.EMOJIS.FORWARD: {
+					const cacheEmbed = this.cache.get(this.page + 1);
+					const embed = cacheEmbed ?? (await this.generator(this.page + 1));
+					if (!cacheEmbed) this.cache.set(this.page + 1, cacheEmbed);
+					if (!embed) return reaction.users.remove(user);
+
+					++this.page;
+					msg.edit(embed);
+					return reaction.users.remove(user);
 				}
 			}
 		});

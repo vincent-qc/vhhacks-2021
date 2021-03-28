@@ -5,6 +5,8 @@ const { join } = require('path');
 const { registerFont } = require('canvas');
 const { CommandOptionType } = require('slash-create');
 const sql = require('../database');
+const { getReputation, getLevel, formatInt } = require('../utils');
+const { loadBackground, imageIDs } = require('../backgrounds');
 
 class RankCommand extends Command {
 	static DEFAULT_COLOR = 'd91208';
@@ -25,70 +27,76 @@ class RankCommand extends Command {
 		});
 	}
 
-	bgImage = null;
-	pfpDropImage = null;
+	bgImages = {};
 	loadedAssets = false;
 
 	/** @param ctx {import('../structures/EnhancedCommandContext')} */
 	async exec(ctx) {
-		await ctx.send('<a:loading:825489363831357460> Generating the rank card...', { ephemeral: true });
 		const user = (await ctx.fetchUserOption('user')) ?? (await ctx.fetchUser());
+		if (user.bot) return ctx.send('The user is a bot. Please provide an actual user.', { ephemeral: true }); // Check for bot
+
+		await ctx.send('<a:loading:825489363831357460> Generating the rank card...');
 
 		await this.loadAssetsOnce();
 		const pfp = await resolveImage(user.displayAvatarURL({ format: 'png', size: 2048 }));
+
 		const results = await sql`
-			SELECT color
-			FROM members
-			WHERE
-				id = ${user.id} AND
-				guild_id = ${ctx.guildID}
-			`;
+			SELECT reputation, position, color, background FROM (
+				SELECT id, reputation, color, background, RANK() OVER (ORDER BY reputation DESC) AS position
+				FROM members
+				WHERE guild_id = ${ctx.guildID}
+			) as t
+			WHERE id = ${user.id}
+		`;
+
+		const backgroundID = results[0]?.background ?? 0;
+		const bgImage = this.bgImages[backgroundID];
 
 		const color = '#' + (results[0]?.color?.toString(16).padStart(6, 0) ?? RankCommand.DEFAULT_COLOR);
+		console.log(color);
+		const reputation = results[0]?.reputation ?? 0;
+		const formattedReputation = formatInt(reputation);
 
-		const currentRep = await sql`
-			SELECT reputation
-			FROM members
-			WHERE
-				id = ${user.id} AND
-				guild_id = ${ctx.guildID}
-			`;
+		const position = results[0]?.position;
+		const formattedPosition = position ? formatInt(position) : '-';
 
-		const totalRep = 100; // For Now
+		const currentLevel = getLevel(reputation);
+		const levelRep = reputation - getReputation(currentLevel);
+		const totalLevelRep = getReputation(currentLevel + 1);
 
-		const barLength = (currentRep / totalRep) * 400 + 20;
+		const barLength = 40 + (levelRep / totalLevelRep) * 534;
 
-		const card = await new Canvas(900, 380)
-			.printImage(this.bgImage, 0, 0, 900, 380) // Background
-			.setColor('#232323')
+		const card = await new Canvas(1000, 380)
+			.createRoundedClip(0, 0, 1000, 380, 30)
+			.printImage(bgImage, 0, 0, 1000, 380) // Background
+			.setGlobalAlpha(0.5)
+			.setColor('#303030')
 			.beginPath() // Create Bar BG
-			.createRoundedPath(338, 301, 530, 52, 50)
+			.createRoundedPath(370, 301, 590, 52, 50)
 			.fill()
+			.setGlobalAlpha(0.8)
 			.setColor(color)
 			.beginPath() // Create Bar FILL
-			.createRoundedPath(346, 309, 514, 36, 40)
+			.createRoundedPath(378, 309, barLength, 36, 40) // Full   =>   .createRoundedPath(346, 309, 514, 36, 40)
 			.fill()
-			.printImage(this.pfpDropImage, 0, 0) // PFPDrop
+			//.printImage(this.pfpDropImage, 0, 0) // PFPDrop
 			.setTextFont('52px Geometos')
 			.setColor('#FFFFFF')
-			.measureText(user.username, (size, inst) => {
-				inst.printResponsiveText(user.username, 354, 80, 440);
-			})
+			.printResponsiveText(user.username, 380, 80, 540)
 			.setTextSize(48)
-			.measureText('#1', (size, inst) => {
-				inst.printText('#1', 840 - size.width, 76);
-			})
+			.measureText(`#${formattedPosition}`, (size, canvas) =>
+				canvas.printText(`#${formattedPosition}`, 960 - size.width, 76),
+			)
 			.setTextSize(28)
 			.setColor('#d5d5d5')
-			.printText('REPUTATION', 380, 260) // Other Stats
-			.printText('LEVEL', 380, 215)
-			.measureText('69', (size, inst) => {
-				inst.printText('69', 840 - size.width, 260);
+			.printText('REPUTATION', 390, 260) // Other Stats
+			.printText('LEVEL', 390, 215)
+			.measureText(formattedReputation, (size, canvas) => canvas.printText(formattedReputation, 960 - size.width, 260))
+			.measureText(currentLevel.toString(), (size, canvas) => {
+				return canvas.printText(currentLevel.toString(), 960 - size.width, 215);
 			})
-			.measureText('420', (size, inst) => {
-				inst.printText('420', 840 - size.width, 215);
-			})
-			.createCircularClip(190, 190, 150) // Clip + PFP
+			//.createCircularClip(190, 190, 150)
+			.createRoundedClip(40, 40, 300, 300, 30) // Clip + PFP
 			.printImage(pfp, 40, 40, 300, 300)
 			.toBufferAsync();
 
@@ -98,12 +106,10 @@ class RankCommand extends Command {
 	async loadAssetsOnce() {
 		if (this.loadedAssets) return;
 
-		const assetDir = join(__dirname, '..', '..', 'assets');
-		this.bgImage = await resolveImage(join(assetDir, 'images', 'usercard', 'card_bg.png'));
-		this.pfpDropImage = await resolveImage(join(assetDir, 'images', 'usercard', 'card_pfp_drop.png'));
-
-		registerFont(join(assetDir, 'fonts', 'Geometos', 'Geometos.ttf'), { family: 'Geometos' });
-
+		for (const imageID of imageIDs) this.bgImages[imageID] = await loadBackground(imageID);
+		registerFont(join(__dirname, '..', '..', 'assets', 'fonts', 'Geometos', 'Geometos.ttf'), {
+			family: 'Geometos',
+		});
 		this.loadedAssets = true;
 	}
 }

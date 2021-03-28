@@ -24,7 +24,24 @@ class MessageEvent extends Event {
 	async exec(message) {
 		if (message.author.bot || !message.guild || !message.content) return;
 		const hadSwears = await this.checkSwears(message);
-		if (hadSwears) return;
+		if (hadSwears) {
+			const toRemove = randInt(35, 45);
+			return sql`
+				UPDATE members
+				SET reputation = GREATEST(reputation - ${toRemove}, 0)
+				WHERE
+					guild_id = ${message.guild.id}
+					AND id = ${message.author.id}
+			`
+				.then(() =>
+					console.log(
+						`Removed ${toRemove} reputation from ${message.author.id} in ${message.guild.id} as they swore in a text channel.`,
+					),
+				)
+				.catch((error) =>
+					console.log('Failed to remove reputation from user due to swearing in a text channel:', error),
+				);
+		}
 
 		const isCooldown = this.repCooldownManager.request(message.author.id);
 		if (isCooldown) return;
@@ -32,8 +49,8 @@ class MessageEvent extends Event {
 		// Give 15-25 rep for each message with cooldown of 1 minute
 		const toAdd = randInt(15, 25);
 		await sql`
-			INSERT INTO members (id, guild_id, color, reputation)
-			VALUES (${message.author.id}, ${message.guild.id}, null, ${toAdd})
+			INSERT INTO members (id, guild_id, color, background, reputation)
+			VALUES (${message.author.id}, ${message.guild.id}, null, null, ${toAdd})
 			ON CONFLICT (id, guild_id)
 			DO UPDATE SET reputation = members.reputation + EXCLUDED.reputation
 		`

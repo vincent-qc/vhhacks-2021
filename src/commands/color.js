@@ -34,8 +34,8 @@ class ColorCommand extends Command {
 		const color = hex.startsWith('#') ? parseInt(hex.slice(1), 16) : parseInt(hex, 16);
 
 		await sql`
-			INSERT INTO members (id, guild_id, color, reputation)
-			VALUES (${ctx.userID}, ${ctx.guildID}, ${color}, 0)
+			INSERT INTO members (id, guild_id, color, background, reputation)
+			VALUES (${ctx.userID}, ${ctx.guildID}, ${color}, null, 0)
 			ON CONFLICT (id, guild_id)
 			DO UPDATE SET color = ${color}
         `

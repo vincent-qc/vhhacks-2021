@@ -7,7 +7,8 @@ const { directMatch } = require('../filter/match');
 const { SwearKind } = require('../filter/patterns');
 const { TextHighlighter } = require('../structures/TextHighlighter');
 const extractInfo = require('../filter/extractInfo');
-const { truncate } = require('../utils');
+const { truncate, randInt } = require('../utils');
+const sql = require('../database');
 
 const speechClient = new SpeechClient();
 
@@ -73,9 +74,28 @@ class GuildMemberSpeakingEvent extends Event {
 				const matches = directMatch(transcript);
 				if (!matches.length) return;
 
+				member.send("Hey there, please don't swear in voice channels.").catch(() => {});
+
 				logChannel
 					.send(this.createLog(transcript, matches, member.voice.channel, member.user))
 					.catch((error) => console.log('Failed to send message to swear log channel:', error));
+
+				const toRemove = randInt(35, 45);
+				sql`
+					UPDATE members
+					SET reputation = GREATEST(reputation - ${toRemove}, 0)
+					WHERE
+						guild_id = ${member.guild.id}
+						AND id = ${member.user.id}
+				`
+					.then(() =>
+						console.log(
+							`Removed ${toRemove} reputation from ${member.user.id} in ${member.guild.id} as they swore in a voice channel.`,
+						),
+					)
+					.catch((error) =>
+						console.log('Failed to remove reputation from user due to swearing in a voice channel:', error),
+					);
 			});
 	}
 

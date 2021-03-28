@@ -60,6 +60,8 @@ class Command extends SlashCommand {
 			return ctx.send('An error occurred while running the command.', { ephemeral: true });
 		}
 	}
+
+	
 }
 
 module.exports = Command;

@@ -17,33 +17,27 @@ class SettingsManager {
 	}
 
 	set(id, key, value) {
-		const data = this.cache.get(id) ?? { id, subscriber_roles: {} };
+		const data = this.cache.get(id) ?? { id };
 		data[key] = value;
 		this.cache.set(id, data);
 
 		return sql`
-			INSERT INTO guild_settings (id, swear_log, publisher_role, subscriber_roles)
-			VALUES (${id}, ${data.swear_log ?? null}, ${data.publisher_role ?? null}, ${sql.json(data.subscriber_roles ?? {})})
+			INSERT INTO guild_settings (id, swear_log)
+			VALUES (${id}, ${data.swear_log ?? null})
 			ON CONFLICT (id)
-			DO UPDATE SET
-				swear_log = ${data.swear_log ?? null},
-				publisher_role = ${data.publisher_role ?? null},
-				subscriber_roles = ${JSON.stringify(data.subscriber_roles ?? {})}
+			DO UPDATE SET swear_log = ${data.swear_log ?? null}
 		`;
 	}
 
 	delete(id, key) {
-		const data = this.cache.get(id) ?? { id, subscriber_roles: {} };
+		const data = this.cache.get(id) ?? { id };
 		delete data[key];
 
 		return sql`
-			INSERT INTO guild_settings (id, swear_log, publisher_role, subscriber_roles)
-			VALUES (${id}, ${data.swear_log ?? null}, ${data.publisher_role ?? null}, ${sql.json(data.subscriber_roles ?? {})})
+			INSERT INTO guild_settings (id, swear_log)
+			VALUES (${id}, ${data.swear_log ?? null})
 			ON CONFLICT (id)
-			DO UPDATE SET
-				swear_log = ${data.swear_log ?? null},
-				publisher_role = ${data.publisher_role ?? null},
-				subscriber_roles = ${sql.json(data.subscriber_roles ?? {})}
+			DO UPDATE SET swear_log = ${data.swear_log ?? null}
 		`;
 	}
 

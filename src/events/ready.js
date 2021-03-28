@@ -13,7 +13,8 @@ class ReadyEvent extends Event {
 
 	async exec() {
 		console.log(`Logged in as ${this.client.user.tag}!`);
-		this.runMigrations();
+		await this.runMigrations();
+		await this.client.settingsManager.init();
 		console.log('Synced database.');
 	}
 
@@ -22,8 +23,6 @@ class ReadyEvent extends Event {
 			CREATE TABLE IF NOT EXISTS guild_settings (
 				id               VARCHAR(19),
 				swear_log        VARCHAR(19),
-				publisher_role   VARCHAR(19),
-				subscriber_roles JSONB NOT NULL DEFAULT '{}'::JSONB,
 
 				PRIMARY KEY (id)
 			);
@@ -34,6 +33,7 @@ class ReadyEvent extends Event {
 				id         VARCHAR(19),
 				guild_id   VARCHAR(19),
 				color      INTEGER,
+				background INTEGER DEFAULT 0,
 				reputation INTEGER DEFAULT 0,
 
 				PRIMARY KEY (id, guild_id)

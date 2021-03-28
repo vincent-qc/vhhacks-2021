@@ -1,5 +1,7 @@
+// @ts-check
 const Command = require('../structures/Command');
 const { CommandOptionType } = require('slash-create');
+const sql = require('../database');
 
 class SetRepCommand extends Command {
 	constructor(creator) {
@@ -38,8 +40,8 @@ class SetRepCommand extends Command {
 		}
 
 		await sql`
-			INSERT INTO members (id, guild_id, color, reputation)
-			VALUES (${message.author.id}, ${message.guild.id}, null, ${reputation})
+			INSERT INTO members (id, guild_id, color, background, reputation)
+			VALUES (${user.id}, ${ctx.guildID}, null, null, ${reputation})
 			ON CONFLICT (id, guild_id)
 			DO UPDATE SET reputation = ${reputation}
 		`
