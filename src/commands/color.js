@@ -5,6 +5,8 @@ const { CommandOptionType } = require('slash-create');
 
 const toHex = require('colornames');
 
+const Emojis = require('../emojis');
+
 class ColorCommand extends Command {
 	constructor(creator) {
 		super(creator, {
@@ -28,7 +30,7 @@ class ColorCommand extends Command {
 		let raw = ctx.options.color.trim();
 		const hex = toHex(raw) ?? raw;
 		if (!/^#?[\da-f]{1,6}$/i.test(hex)) {
-			return void ctx.send("That wasn't a valid color, please try again.", { ephemeral: true });
+			return void ctx.send(`${Emojis.ERROR} That wasn't a valid color, please try again.`, { ephemeral: true });
 		}
 
 		const color = hex.startsWith('#') ? parseInt(hex.slice(1), 16) : parseInt(hex, 16);
@@ -41,15 +43,17 @@ class ColorCommand extends Command {
         `
 			.then(() => {
 				ctx.send(
-					`Successfully changed your rank card color to ${
+					`${Emojis.CHECK} Successfully changed your rank card color to \`${
 						hex.startsWith('#') ? hex.toUpperCase() : '#' + hex.toUpperCase()
-					}!`,
+					}\`!`,
 					{ ephemeral: true },
 				);
 			})
 			.catch((error) => {
 				console.log('Error changing rank card color:', error);
-				ctx.send('An error occurred while changing your rank card color, please try again.', { ephemeral: true });
+				ctx.send(`${Emojis.ERROR} An error occurred while changing your rank card color, please try again.`, {
+					ephemeral: true,
+				});
 			});
 	}
 }

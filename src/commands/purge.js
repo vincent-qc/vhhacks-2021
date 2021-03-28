@@ -5,6 +5,8 @@ const { ms } = require('@naval-base/ms');
 
 const RE2 = require('re2');
 
+const Emojis = require('../emojis');
+
 class PurgeCommand extends Command {
 	constructor(creator) {
 		super(creator, {
@@ -59,17 +61,21 @@ class PurgeCommand extends Command {
 
 		const { amount } = ctx.options;
 		if (amount <= 0 || amount > 100) {
-			await ctx.send('The amount of messages to purge provided was invalid. Please try again.', { ephemeral: true });
+			await ctx.send(`${Emojis.ERROR} The amount of messages to purge provided was invalid. Please try again.`, {
+				ephemeral: true,
+			});
 			return;
 		}
 
 		if (Object.keys(ctx.options).length === 1 && typeof amount === 'number') {
 			return void ctx.channel
 				.bulkDelete(amount, true)
-				.then((msgs) => ctx.send(`Purged ${msgs.size} messages!`, { ephemeral: true }))
+				.then((msgs) => ctx.send(`${Emojis.CHECK} Purged ${msgs.size} messages!`, { ephemeral: true }))
 				.catch((error) => {
 					console.log('Error bulk deleting messages:', error);
-					return ctx.send('An error occurred while purging the messages. Please try again.', { ephemeral: true });
+					return ctx.send(`${Emojis.ERROR} An error occurred while purging the messages. Please try again.`, {
+						ephemeral: true,
+					});
 				});
 		}
 
@@ -78,7 +84,7 @@ class PurgeCommand extends Command {
 			const parsed = ms(ctx.options['max-age']);
 			if (!parsed) {
 				ctx.send(
-					'The duration provided as the max age for messages was invalid. Please try again with a valid duration.',
+					`${Emojis.ERROR} The duration provided as the max age for messages was invalid. Please try again with a valid duration.`,
 					{ ephemeral: true },
 				);
 				return;
@@ -92,7 +98,7 @@ class PurgeCommand extends Command {
 			const parsed = ms(ctx.options['min-age']);
 			if (!parsed) {
 				ctx.send(
-					'The duration provided as the min age for messages was invalid. Please try again with a valid duration.',
+					`${Emojis.ERROR} The duration provided as the min age for messages was invalid. Please try again with a valid duration.`,
 					{ ephemeral: true },
 				);
 				return;
@@ -106,7 +112,7 @@ class PurgeCommand extends Command {
 			try {
 				regex = new RE2(ctx.options.regex, ctx.options['regex-case-insensitive'] ? 'i' : '');
 			} catch (error) {
-				ctx.send('The regular expression provided was invalid. Please try again with a valid one.', {
+				ctx.send(`${Emojis.ERROR} The regular expression provided was invalid. Please try again with a valid one.`, {
 					ephemeral: true,
 				});
 				return;
@@ -140,10 +146,12 @@ class PurgeCommand extends Command {
 
 		await ctx.channel
 			.bulkDelete(toDelete)
-			.then((msgs) => ctx.send(`Purged ${msgs.size} messages!`, { ephemeral: true }))
+			.then((msgs) => ctx.send(`${Emojis.CHECK} Purged \`${msgs.size}\` messages!`, { ephemeral: true }))
 			.catch((error) => {
 				console.log('Error bulk deleting messages:', error);
-				return ctx.send('An error occurred while purging the messages. Please try again.', { ephemeral: true });
+				return ctx.send(`${Emojis.ERROR} An error occurred while purging the messages. Please try again.`, {
+					ephemeral: true,
+				});
 			});
 	}
 }

@@ -7,6 +7,7 @@ const { join } = require('path');
 
 const LazyPaginatedEmbed = require('../structures/LazyPaginatedEmbed');
 const { getLevel, formatInt } = require('../utils');
+const Emojis = require('../emojis');
 
 class LeaderboardCommand extends Command {
 	constructor(creator) {
@@ -27,17 +28,17 @@ class LeaderboardCommand extends Command {
 
 	/** @param ctx {import('../structures/EnhancedCommandContext')} */
 	async exec(ctx) {
-		await ctx.send('<a:loading:825489363831357460> Generating the leaderboard...');
+		await ctx.send(`${Emojis.LOADING} Generating the leaderboard...`);
 
 		const page = ctx.options.page ?? 1;
 		if (page < 1 || page > 500_000) {
-			await ctx.send("That's not a valid page, please try again.", { ephemeral: true });
+			await ctx.send(`${Emojis.ERROR} That's not a valid page, please try again.`, { ephemeral: true });
 			return;
 		}
 
 		const embed = await this.generatePage(page, ctx.guildID);
 		if (!embed) {
-			await ctx.send('No users were found on that page, please try again.', { ephemeral: true });
+			await ctx.send(`${Emojis.ERROR} No users were found on that page, please try again.`, { ephemeral: true });
 			return;
 		}
 
@@ -53,6 +54,7 @@ class LeaderboardCommand extends Command {
 
 	async generatePage(page, guildID) {
 		const offset = (page - 1) * 10;
+		if (offset < 0) return undefined;
 
 		const rows = await sql`
 			SELECT reputation, position, id FROM (
@@ -74,11 +76,12 @@ class LeaderboardCommand extends Command {
 				const formattedRep = formatInt(row.reputation);
 				return `**${row.position}.** [\`${user?.tag ?? 'not real#????'}\`](${
 					user?.displayAvatarURL() ?? 'https://discordapp.com'
-				}) — Level ${level} (${formattedRep} exp)`;
+				}) — Level ${level} (${formattedRep} rep)`;
 			})
 			.join('\n');
 
 		return new MessageEmbed()
+			.setAuthor('Ikenai', this.client.user.displayAvatarURL())
 			.setTitle('Reputation Leaderboard')
 			.setThumbnail('https://cdn.discordapp.com/attachments/825168243043336256/825569860355751966/trophy.png')
 			.setColor(0xffc600)

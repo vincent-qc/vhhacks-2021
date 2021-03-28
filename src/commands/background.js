@@ -4,6 +4,8 @@ const sql = require('../database');
 const { CommandOptionType } = require('slash-create');
 const { imageIDs } = require('../backgrounds');
 
+const Emojis = require('../emojis');
+
 class BackgroundCommand extends Command {
 	constructor(creator) {
 		super(creator, {
@@ -28,9 +30,10 @@ class BackgroundCommand extends Command {
 	/** @param ctx {import('../structures/EnhancedCommandContext')} */
 	async exec(ctx) {
 		const id = ctx.options['image-id'];
+		console.log(id);
 		if (!imageIDs.includes(id)) {
 			await ctx.send(
-				`Invalid background ID supplied. Check out a list of valid ones using the view-backgrounds command.`,
+				`${Emojis.ERROR} Invalid background ID supplied. Check out a list of valid ones using the \`view-backgrounds\` command.`,
 				{ ephemeral: true },
 			);
 			return;
@@ -42,10 +45,10 @@ class BackgroundCommand extends Command {
 			ON CONFLICT (id, guild_id)
 			DO UPDATE SET background = EXCLUDED.background
 		`
-			.then(() => ctx.send('Successfully updated your background image.', { ephemeral: true }))
+			.then(() => ctx.send(`${Emojis.CHECK} Successfully updated your background image.`, { ephemeral: true }))
 			.catch((error) => {
 				console.log('Error updating user rank card background:', error);
-				return ctx.send('An error occurred while updating your background image, please try again.', {
+				return ctx.send(`${Emojis.ERROR} An error occurred while updating your background image, please try again.`, {
 					ephemeral: true,
 				});
 			});

@@ -8,6 +8,8 @@ const sql = require('../database');
 const { getReputation, getLevel, formatInt } = require('../utils');
 const { loadBackground, imageIDs } = require('../backgrounds');
 
+const Emojis = require('../emojis');
+
 class RankCommand extends Command {
 	static DEFAULT_COLOR = 'd91208';
 
@@ -35,7 +37,7 @@ class RankCommand extends Command {
 		const user = (await ctx.fetchUserOption('user')) ?? (await ctx.fetchUser());
 		if (user.bot) return ctx.send('The user is a bot. Please provide an actual user.', { ephemeral: true }); // Check for bot
 
-		await ctx.send('<a:loading:825489363831357460> Generating the rank card...');
+		const msg = await ctx.send(`${Emojis.LOADING} Generating the rank card...`);
 
 		await this.loadAssetsOnce();
 		const pfp = await resolveImage(user.displayAvatarURL({ format: 'png', size: 2048 }));
@@ -63,15 +65,12 @@ class RankCommand extends Command {
 		const levelRep = reputation - getReputation(currentLevel);
 		const totalLevelRep = getReputation(currentLevel + 1);
 
-		console.log('levelrepL: ' + levelRep.toString() + '    totalrep: ' + totalLevelRep.toString());
-
 		const barLength = 40 + (levelRep / totalLevelRep) * 534;
-
 		const card = await new Canvas(1000, 380)
 			.createRoundedClip(0, 0, 1000, 380, 30)
 			.printImage(bgImage, 0, 0, 1000, 380) // Background
 			.setGlobalAlpha(0.6)
-			.setColor('#303030')
+			.setColor('#101010')
 			.beginPath() // Create Bar BG
 			.createRoundedPath(370, 301, 590, 52, 50)
 			.fill()
@@ -80,7 +79,7 @@ class RankCommand extends Command {
 			.beginPath() // Create Bar FILL
 			.createRoundedPath(378, 309, barLength, 36, 40) // Full   =>   .createRoundedPath(346, 309, 514, 36, 40)
 			.fill()
-			//.printImage(this.pfpDropImage, 0, 0) // PFPDrop
+			// .printImage(this.pfpDropImage, 0, 0) // PFPDrop
 			.setTextFont('52px Geometos')
 			.setColor('#FFFFFF')
 			.printResponsiveText(user.username, 380, 80, 540)
@@ -89,20 +88,21 @@ class RankCommand extends Command {
 				canvas.printText(`#${formattedPosition}`, 960 - size.width, 76),
 			)
 			.setTextSize(28)
-			.setColor('#d5d5d5')
+			.setColor('#e2e2e2')
 			.printText('REPUTATION', 390, 260) // Other Stats
 			.printText('LEVEL', 390, 215)
 			.measureText(formattedReputation, (size, canvas) => canvas.printText(formattedReputation, 960 - size.width, 260))
 			.measureText(currentLevel.toString(), (size, canvas) => {
 				return canvas.printText((currentLevel + 1).toString(), 960 - size.width, 215);
 			})
-			//.createCircularClip(190, 190, 150)
+			// .createCircularClip(190, 190, 150)
 			.setGlobalAlpha(1)
 			.createRoundedClip(40, 40, 300, 300, 30) // Clip + PFP
 			.printImage(pfp, 40, 40, 300, 300)
 			.toBufferAsync();
 
 		await ctx.sendFollowUp({ content: `Rank card for **${user.tag}:**`, file: { name: 'card.png', file: card } });
+		
 	}
 
 	async loadAssetsOnce() {

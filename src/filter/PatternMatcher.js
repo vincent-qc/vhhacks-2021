@@ -8,6 +8,8 @@ const UPPER_Z = getCode('Z');
 const LOWER_A = getCode('a');
 const LOWER_Z = getCode('z');
 
+// note: some of this code is a translation of the textbook C++ impl of the Aho-Corasick automaton here
+// https://iq.opengenus.org/aho-corasick-algorithm/
 class PatternMatcher {
 	rootNode = new TrieNode();
 	_maxDepth = -1;

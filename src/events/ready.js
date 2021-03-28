@@ -16,6 +16,14 @@ class ReadyEvent extends Event {
 		await this.runMigrations();
 		await this.client.settingsManager.init();
 		console.log('Synced database.');
+
+		this.client.user
+			.setActivity({
+				type: 'WATCHING',
+				name: 'messages fly by',
+			})
+			.then(() => console.log('Successfully set activity!'))
+			.catch((error) => console.log('Error setting activity:', error));
 	}
 
 	async runMigrations() {

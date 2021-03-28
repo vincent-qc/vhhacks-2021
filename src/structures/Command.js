@@ -2,6 +2,8 @@
 const { SlashCommand } = require('slash-create');
 const EnhancedCommandContext = require('./EnhancedCommandContext');
 
+const Emojis = require('../emojis');
+
 class Command extends SlashCommand {
 	/**
 	 * @param creator {import('slash-create').SlashCreator}
@@ -34,19 +36,19 @@ class Command extends SlashCommand {
 	async runInhibitors(ctx) {
 		// Block if no guild
 		if (!ctx.guildID) {
-			ctx.send('This command may only be used in a guild.', { ephemeral: true });
+			ctx.send(`${Emojis.ERROR} This command may only be used in a guild.`, { ephemeral: true });
 			return true;
 		}
 
 		if (this.ownerOnly && !this.client.isOwner(ctx.userID)) {
-			ctx.send('This command may only be used by owners.', { ephemeral: true });
+			ctx.send(`${Emojis.ERROR} This command may only be used by bot owners.`, { ephemeral: true });
 			return true;
 		}
 
 		if (this.adminOnly) {
 			const member = await ctx.fetchMember();
 			if (!member.permissions.has('ADMINISTRATOR')) {
-				ctx.send('This command may only be used by server administrators.', { ephemeral: true });
+				ctx.send(`${Emojis.ERROR} This command may only be used by server administrators.`, { ephemeral: true });
 				return true;
 			}
 		}
@@ -57,11 +59,9 @@ class Command extends SlashCommand {
 	onError(err, ctx) {
 		console.log(`[Command] Error while running command:`, err);
 		if (!ctx.expired && !ctx.initiallyResponded) {
-			return ctx.send('An error occurred while running the command.', { ephemeral: true });
+			return ctx.send(`${Emojis.ERROR} An error occurred while running the command.`, { ephemeral: true });
 		}
 	}
-
-	
 }
 
 module.exports = Command;

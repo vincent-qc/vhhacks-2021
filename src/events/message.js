@@ -68,7 +68,7 @@ class MessageEvent extends Event {
 		const matches = match(message.content);
 		if (!matches.length) return false;
 
-		await message.delete();
+		if (message.deletable) message.delete();
 		const msg = await message.channel.send(`Hey ${message.author}, please don't swear here!`);
 		setTimeout(() => {
 			if (msg.deletable) msg.delete().catch((error) => console.log('Error deleting message:', error));

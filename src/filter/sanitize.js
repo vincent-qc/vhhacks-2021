@@ -1,7 +1,9 @@
 // @ts-check
 const { isHighSurrogate, isLowSurrogate, UnicodeCategory, getUnicodeCategory, getCode } = require('@skyra/char');
 
-// Based off https://github.com/gc/confusables/blob/master/src/characters.ts
+// Note: the following list of confusable characters was taken from another project of mine which contains a list of confusable characters:
+// https://github.com/jo3-l/serenity/blob/ce6a387aaa115a987f78193224125297962e4b34/src/lib/moderation/filter/assets/confusables.ts
+// The above is based off https://github.com/gc/confusables/blob/master/src/characters.ts
 // Copyright (c) 2020 gc, MIT license
 const allCharacters = new Map([
 	[
@@ -105,18 +107,21 @@ function sanitize(text) {
 	let normal = '';
 	const idxs = [];
 
-	let i = 0;
-	while (i < text.length) {
-		const first = text.charCodeAt(i);
-		if (i !== text.length - 1 && isHighSurrogate(first)) {
-			const second = text.charCodeAt(i + 1);
+	let idx = 0;
+	while (idx < text.length) {
+		const first = text.charCodeAt(idx);
+		if (idx !== text.length - 1 && isHighSurrogate(first)) {
+			const second = text.charCodeAt(idx + 1);
 			if (isLowSurrogate(second)) {
+				// this is the fastest way to iterate over a string's codepoints
+				// check out https://mathiasbynens.be/notes/javascript-encoding for algorithm
 				const combined = (first - 0xd800) * 0x400 + second - 0xdc00 + 0x10000;
 				const norm = confusables.get(combined);
 				if (norm) {
 					normal += norm;
-					idxs.push(i);
+					idxs.push(idx);
 				} else {
+					// this handles stuff like zalgo by simply stripping it out
 					switch (getUnicodeCategory(combined)) {
 						case 5 /* non spacing mark */:
 						case 6 /* spacing combining mark */:
@@ -124,10 +129,10 @@ function sanitize(text) {
 							break;
 						default:
 							normal += String.fromCodePoint(combined);
-							idxs.push(i);
+							idxs.push(idx);
 					}
 				}
-				i += 2;
+				idx += 2;
 				continue;
 			}
 		}
@@ -135,19 +140,20 @@ function sanitize(text) {
 		const norm = confusables.get(first);
 		if (norm) {
 			normal += norm;
-			idxs.push(i);
+			idxs.push(idx);
 		} else {
+			// again, handle zalgo
 			switch (getUnicodeCategory(first)) {
 				case 5 /* non spacing mark */:
 				case 6 /* spacing combining mark */:
 				case 7 /* enclosing mark */:
 					break;
 				default:
-					normal += text.charAt(i);
-					idxs.push(i);
+					normal += text.charAt(idx);
+					idxs.push(idx);
 			}
 		}
-		i += 1;
+		idx += 1;
 	}
 
 	return { normal, indices: idxs };

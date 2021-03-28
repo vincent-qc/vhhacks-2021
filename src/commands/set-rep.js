@@ -3,6 +3,8 @@ const Command = require('../structures/Command');
 const { CommandOptionType } = require('slash-create');
 const sql = require('../database');
 
+const Emojis = require('../emojis');
+
 class SetRepCommand extends Command {
 	constructor(creator) {
 		super(creator, {
@@ -33,10 +35,9 @@ class SetRepCommand extends Command {
 		const reputation = await ctx.options.reputation;
 
 		if (reputation < 0 || reputation > 0x7fffffff) {
-			return void ctx.send(
-				'Sorry, the amount of reputation provided was invalid. It must be a positive integer less than 2,147,483,647.',
-				{ ephemeral: true },
-			);
+			return void ctx.send(`${Emojis.ERROR} Sorry, the amount of reputation provided was invalid, please try again.`, {
+				ephemeral: true,
+			});
 		}
 
 		await sql`
@@ -45,9 +46,11 @@ class SetRepCommand extends Command {
 			ON CONFLICT (id, guild_id)
 			DO UPDATE SET reputation = ${reputation}
 		`
-			.then(() => ctx.send("Successfully updated the user's reputation.", { ephemeral: true }))
+			.then(() => ctx.send(`${Emojis.CHECK} Successfully updated the user's reputation.`, { ephemeral: true }))
 			.catch(() =>
-				ctx.send("An error occurred when updating the user's reputation, please try again.", { ephemeral: true }),
+				ctx.send(`${Emojis.ERROR} An error occurred when updating the user's reputation, please try again.`, {
+					ephemeral: true,
+				}),
 			);
 	}
 }

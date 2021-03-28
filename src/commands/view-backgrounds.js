@@ -3,8 +3,10 @@ const Command = require('../structures/Command');
 const sql = require('../database');
 const { CommandOptionType } = require('slash-create');
 const LazyPaginatedEmbed = require('../structures/LazyPaginatedEmbed');
-const { bgLinks, imageIDs } = require('../backgrounds');
+const { bgLinks, imageIDs, dominantColors } = require('../backgrounds');
 const { MessageEmbed } = require('discord.js');
+
+const Emojis = require('../emojis');
 
 class ViewBackgroundsCommand extends Command {
 	constructor(creator) {
@@ -29,13 +31,13 @@ class ViewBackgroundsCommand extends Command {
 
 	/** @param ctx {import('../structures/EnhancedCommandContext')} */
 	async exec(ctx) {
-		await ctx.send('<a:loading:825489363831357460> Generating the background display...');
+		await ctx.send(`${Emojis.LOADING} Generating the background display...`);
 
 		const id = ctx.options['image-id'];
 		const index = id ? imageIDs.indexOf(id) : 0;
 		if (index === -1) {
 			await ctx.send(
-				`Invalid background ID supplied. Check out a list of valid ones using the view-backgrounds command.`,
+				`${Emojis.ERROR} Invalid background ID supplied. Check out a list of valid ones using the \`view-backgrounds\` command.`,
 				{ ephemeral: true },
 			);
 			return;
@@ -46,7 +48,7 @@ class ViewBackgroundsCommand extends Command {
 		const djsMessage = await ctx.channel.messages.fetch(message.id);
 
 		await new LazyPaginatedEmbed()
-			.setGenerator(this.generatePage)
+			.setGenerator((page) => this.generatePage(page))
 			.setIdleTimeout(60_000)
 			.setStartPage(index + 1)
 			.start(djsMessage, ctx.userID);
@@ -54,11 +56,13 @@ class ViewBackgroundsCommand extends Command {
 
 	generatePage(page) {
 		const index = page - 1;
-		if (index >= imageIDs.length) return undefined;
+		if (index >= imageIDs.length || index < 0) return undefined;
 		const id = imageIDs[index];
+		const color = dominantColors[index];
 		return new MessageEmbed()
-			.setTitle('Available backgrounds')
-			.setColor('ORANGE')
+			.setAuthor('Ikenai', this.client.user.displayAvatarURL())
+			.setTitle(`Background ${page}/${imageIDs.length}`)
+			.setColor(color)
 			.setImage(bgLinks[id])
 			.setFooter(`Equip this background by using /background ${id}`)
 			.setTimestamp();

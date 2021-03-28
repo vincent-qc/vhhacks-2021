@@ -1,5 +1,30 @@
 // @ts-check
 
+/**
+ * !!!!!!!!!!!!!!!!!!!!!DISCLAIMER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * NOTE:
+ *
+ * THERE ARE POTENTIALLY OFFENSIVE WORDS INCLUDED IN THIS FILE
+ * WE CHOSE THE ONES BELOW SO WE COULD HAVE AT LEAST ONE FOR EACH
+ * SWEAR KIND.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!END DISCLAIMER!!!!!!!!!!!!!!!!!!!
+ */
+
 const SwearKind = Object.freeze({
 	RACIST: 0,
 	DEROGATORY: 1,

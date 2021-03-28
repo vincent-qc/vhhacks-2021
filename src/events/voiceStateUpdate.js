@@ -19,12 +19,12 @@ class VoiceStateUpdateEvent extends Event {
 
 		const { guild } = newState;
 		// If only we are left:
-		if (guild.voice?.channel.members.size === 1) {
+		if (guild.voice?.channel?.members.size === 1) {
 			console.log(`[Voice] Just left ${oldState.channelID} as everyone left :(`);
 			guild.voice.channel.leave();
 		}
 
-		if (newState.channelID && !guild.voice) {
+		if (newState.channelID && !guild.voice?.channel) {
 			console.log(`[Voice] Just joined ${newState.channelID} :D`);
 			await newState.channel.join();
 		}

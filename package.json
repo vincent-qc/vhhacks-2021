@@ -21,6 +21,7 @@
     "@google-cloud/speech": "^4.4.0",
     "@naval-base/ms": "^3.1.0",
     "@skyra/char": "^1.0.1",
+    "body-parser": "^1.19.0",
     "canvas": "^2.7.0",
     "canvas-constructor": "^4.1.0",
     "colornames": "^1.1.1",
