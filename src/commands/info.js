@@ -9,7 +9,6 @@ class InfoCommand extends Command {
 		super(creator, {
 			name: 'info',
 			description: 'View information about the bot!',
-			guildIDs: ['825168243043336253'],
 		});
 	}
 

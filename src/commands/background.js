@@ -23,7 +23,6 @@ class BackgroundCommand extends Command {
 					required: true,
 				},
 			],
-			guildIDs: ['825168243043336253'],
 		});
 	}
 

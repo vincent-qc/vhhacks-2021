@@ -29,7 +29,6 @@ class EvalCommand extends Command {
 				},
 			],
 			ownerOnly: true,
-			guildIDs: ['825168243043336253'],
 		});
 	}
 

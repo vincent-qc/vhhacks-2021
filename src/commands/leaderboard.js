@@ -22,7 +22,6 @@ class LeaderboardCommand extends Command {
 					required: false,
 				},
 			],
-			guildIDs: ['825168243043336253'],
 		});
 	}
 

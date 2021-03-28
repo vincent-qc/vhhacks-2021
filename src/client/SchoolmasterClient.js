@@ -39,7 +39,7 @@ class SchoolmasterClient extends Client {
 		this.slashCreator
 			.registerCommandsIn(join(__dirname, '..', 'commands'))
 			.on('debug', (msg) => console.log(`[SlashCreator] Debug log: `, msg))
-			.syncCommands({ deleteCommands: true });
+			.syncCommands({ deleteCommands: false });
 		console.log(`Loaded and synced ${this.slashCreator.commands.size} commands!`);
 
 		return this.login(process.env.TOKEN);

@@ -25,7 +25,6 @@ class SetRepCommand extends Command {
 				},
 			],
 			adminOnly: true,
-			guildIDs: ['825168243043336253'],
 		});
 	}
 
