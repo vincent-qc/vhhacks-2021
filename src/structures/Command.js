@@ -38,13 +38,13 @@ class Command extends SlashCommand {
 			return true;
 		}
 
-		if (this.ownerOnly && !this.client.isOwner(ctx.user.id)) {
+		if (this.ownerOnly && !this.client.isOwner(ctx.userID)) {
 			ctx.send('This command may only be used by owners.', { ephemeral: true });
 			return true;
 		}
 
 		if (this.adminOnly) {
-			const member = await ctx.getMember();
+			const member = await ctx.fetchMember();
 			if (!member.permissions.has('ADMINISTRATOR')) {
 				ctx.send('This command may only be used by server administrators.', { ephemeral: true });
 				return true;

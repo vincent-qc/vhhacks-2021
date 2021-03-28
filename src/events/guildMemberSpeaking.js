@@ -1,9 +1,13 @@
 // @ts-check
-const fs = require('fs');
 const { Readable } = require('stream');
 const Event = require('../structures/Event');
 const { SpeechClient } = require('@google-cloud/speech');
-const { MessageAttachment } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
+const { directMatch } = require('../filter/match');
+const { SwearKind } = require('../filter/patterns');
+const { TextHighlighter } = require('../structures/TextHighlighter');
+const extractInfo = require('../filter/extractInfo');
+const { truncate } = require('../utils');
 
 const speechClient = new SpeechClient();
 
@@ -29,7 +33,7 @@ class GuildMemberSpeakingEvent extends Event {
 	 * @param speaking {import('discord.js').Speaking}
 	 */
 	async exec(member, speaking) {
-		if (speaking.bitfield === 0 || member.user.bot) return;
+		if (!this.client.enableTranscription || speaking.bitfield === 0 || member.user.bot) return;
 
 		// If we're already listening to a channel in the guild, return early, as we can't join two channels at the same time.
 		if (member.guild.voice && member.guild.voice.channelID !== member.voice.channelID) return;
@@ -58,13 +62,20 @@ class GuildMemberSpeakingEvent extends Event {
 
 				// @ts-expect-error
 				const [response] = await speechClient.recognize({ audio, config });
-
-				// TODO: Change this to a configurable log channel
-				const channel = this.client.channels.cache.get('825168243043336256');
 				const transcript = response.results.map((result) => result.alternatives[0].transcript).join('\n');
 
-				// @ts-expect-error - Channel must be a text channel.
-				if (transcript.length) channel.send(`Transcript: ${transcript}`);
+				const logChannelID = this.client.settingsManager.get(member.guild.id)?.swear_log;
+				if (!logChannelID) return;
+
+				const logChannel = this.client.channels.cache.get(logChannelID);
+				if (!logChannel) return;
+
+				const matches = directMatch(transcript);
+				if (!matches.length) return;
+
+				logChannel
+					.send(this.createLog(transcript, matches, member.voice.channel, member.user))
+					.catch((error) => console.log('Failed to send message to swear log channel:', error));
 			});
 	}
 
@@ -83,6 +94,30 @@ class GuildMemberSpeakingEvent extends Event {
 			console.log(`[Voice] Error converting audio:`, error);
 			throw error;
 		}
+	}
+
+	createLog(text, matches, channel, user) {
+		const highlighter = new TextHighlighter(text);
+		for (const match of matches) highlighter.highlight(match.startIndex, match.endIndex);
+
+		const { swearKinds, words } = extractInfo(matches);
+
+		return new MessageEmbed()
+			.setAuthor('Voice Channel Swear Logs', 'https://cdn.discordapp.com/emojis/274789152342671360.png?v=1')
+			.addField('Channel', `\`${channel.name}\` (${channel.id})`)
+			.addField('User', `${user.tag} (${user.id})`)
+			.addField(
+				'Summary',
+				`
+					<:small_red_diamond:825492067030532136> **Derogatory:** ${swearKinds[SwearKind.DEROGATORY]}
+					🔸 **Sexual:** ${swearKinds[SwearKind.SEXUAL]}
+					<:small_yellow_diamond:825492066749382657> **Racist:** ${swearKinds[SwearKind.RACIST]}
+				`,
+			)
+			.addField('Matched Words', words.map((count, word) => `\`${word}\` — ${count}`).join('\n'))
+			.addField('Transcript', truncate(highlighter.getText(), 1000))
+			.setColor('ORANGE')
+			.setTimestamp();
 	}
 }
 

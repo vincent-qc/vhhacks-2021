@@ -41,7 +41,7 @@ const patterns = [
 	{
 		name: 'anus',
 		kind: SwearKind.SEXUAL,
-		patterns: ['anus'],
+		patterns: ['|anus'],
 	},
 	{
 		name: 'africoon',

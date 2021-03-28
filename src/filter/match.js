@@ -9,7 +9,7 @@ const toAdd = [];
 for (const { patterns: pats, ...metadata } of patterns) {
 	for (const pat of pats) toAdd.push({ pattern: pat, metadata });
 }
-automaton.addPatterns(toAdd);
+automaton.setPatterns(toAdd);
 
 function directMatch(text) {
 	return automaton.search(text);
@@ -22,6 +22,8 @@ function match(text) {
 		match.startIndex = indices[match.startIndex];
 		match.endIndex = indices[match.endIndex];
 	}
+
+	return matches;
 }
 
 module.exports = { directMatch, match };

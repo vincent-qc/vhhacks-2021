@@ -10,9 +10,10 @@ const LOWER_Z = getCode('z');
 
 class PatternMatcher {
 	rootNode = new TrieNode();
+	_maxDepth = -1;
 
 	/** @param {Pattern[]} patterns */
-	addPatterns(patterns) {
+	setPatterns(patterns) {
 		for (let i = 0; i < patterns.length; i++) {
 			let { pattern, metadata } = patterns[i];
 			let wordBoundaryAtEnd = false;
@@ -41,6 +42,7 @@ class PatternMatcher {
 
 			currentNode.patternIndex = i;
 			currentNode.length = pattern.length;
+			if (pattern.length > this._maxDepth) this._maxDepth = pattern.length;
 			currentNode.metadata = metadata;
 			currentNode.wordBoundaryAtEnd = wordBoundaryAtEnd;
 			currentNode.wordBoundaryAtStart = wordBoundaryAtStart;
@@ -84,16 +86,23 @@ class PatternMatcher {
 		/** @type {PatternMatch[]} */
 		const matches = [];
 
+		const indexDeque = new Denque();
+
 		let parent = this.rootNode;
 		for (let i = 0; i < str.length; i++) {
 			let c = str.charCodeAt(i);
+			if (!PatternMatcher.isAlpha(c)) continue;
+
+			indexDeque.push(i);
+
 			// convert to lower by flipping 5th bit
 			if (UPPER_A <= c && c <= UPPER_Z) c ^= 0x20;
 			const child = parent.children.get(c);
 			if (child) {
 				parent = child;
 				if (parent.patternIndex >= 0) {
-					const startIndex = i - parent.length + 1;
+					const startIndex = indexDeque.get(indexDeque.length - parent.length);
+					// const startIndex = i - parent.length + 1;
 
 					const ok =
 						(!parent.wordBoundaryAtStart ||
@@ -107,7 +116,8 @@ class PatternMatcher {
 
 				let temp = parent.outputLink;
 				while (temp) {
-					const startIndex = i - temp.length + 1;
+					const startIndex = indexDeque.get(indexDeque.length - temp.length);
+					// const startIndex = i - temp.length + 1;
 					const ok =
 						(!temp.wordBoundaryAtStart ||
 							startIndex === 0 ||
@@ -119,8 +129,15 @@ class PatternMatcher {
 				}
 			} else {
 				while (parent !== this.rootNode && !parent.children.has(c)) parent = parent.suffixLink;
-				if (parent.children.has(c)) --i;
+				if (parent.children.has(c)) {
+					indexDeque.pop();
+					--i;
+				}
 			}
+
+			// why +2 you ask? well i wasnt sure if just > was gonna be enough so i did a +2 for safety
+			// its a hackathon yknow, gotta go fast :sunglasses:
+			if (indexDeque.length > this._maxDepth + 2) indexDeque.shift();
 		}
 
 		return matches;

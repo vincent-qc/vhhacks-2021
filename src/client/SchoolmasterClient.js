@@ -4,8 +4,12 @@ const EventHandler = require('../structures/EventHandler');
 const { join } = require('path');
 const { GatewayServer } = require('slash-create');
 const SchoolmasterSlashCreator = require('./SchoolmasterSlashCreator');
+const SettingsManager = require('../structures/SettingsManager');
 
 class SchoolmasterClient extends Client {
+	enableTranscription = false;
+	settingsManager = new SettingsManager();
+
 	constructor() {
 		super({
 			allowedMentions: {
@@ -37,6 +41,8 @@ class SchoolmasterClient extends Client {
 			.on('debug', (msg) => console.log(`[SlashCreator] Debug log: `, msg))
 			.syncCommands();
 		console.log(`Loaded and synced ${this.slashCreator.commands.size} commands!`);
+
+		await this.settingsManager.init();
 
 		return this.login(process.env.TOKEN);
 	}

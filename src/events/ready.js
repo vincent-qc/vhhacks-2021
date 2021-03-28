@@ -32,8 +32,11 @@ class ReadyEvent extends Event {
 		await sql`
 			CREATE TABLE IF NOT EXISTS members (
 				id         VARCHAR(19),
+				guild_id   VARCHAR(19),
 				color      INTEGER,
-				reputation INTEGER,
+				reputation INTEGER DEFAULT 0,
+
+				PRIMARY KEY (id, guild_id)
 			);
 		`;
 	}

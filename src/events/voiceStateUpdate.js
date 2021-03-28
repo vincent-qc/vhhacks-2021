@@ -14,8 +14,19 @@ class VoiceStateUpdateEvent extends Event {
 	 * @param newState {import('discord.js').VoiceState}
 	 */
 	async exec(oldState, newState) {
-		if (oldState.channelID !== newState.channelID && newState.channelID) {
-			console.log(`[Voice] Just joined voice channel '${newState.channelID}'!`);
+		// Ignore if the user didn't change channels.
+		if (oldState.channelID === newState.channelID) return;
+
+		const { guild } = newState;
+
+		// If we're in the old room and it's now empty, leave it.
+		if (guild.voice && guild.voice.channelID === oldState.channelID && oldState.channel.members.size === 0) {
+			console.log(`[Voice] Just left ${oldState.channelID} as everyone left :(`);
+			guild.voice.channel.leave();
+		}
+
+		if (newState.channelID && !guild.voice) {
+			console.log(`[Voice] Just joined ${newState.channelID} :D`);
 			await newState.channel.join();
 		}
 	}

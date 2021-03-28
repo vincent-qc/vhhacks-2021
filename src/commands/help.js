@@ -1,5 +1,5 @@
 // @ts-check
-const { CommandOptionType } = require('slash-create');
+/*const { CommandOptionType } = require('slash-create');
 const Command = require('../structures/Command');
 const { inspect } = require('util');
 const fs = require('fs/promises');
@@ -24,10 +24,10 @@ class HelpCommand extends Command {
 			ownerOnly: false,
 			guildIDs: ['825168243043336253'],
 		});
-	}
+	}*/
 
-	/** @param ctx {import('../structures/EnhancedCommandContext')} */
-	async run(ctx) {
+/** @param ctx {import('../structures/EnhancedCommandContext')} */
+/*async run(ctx) {
 		if (!this.helpEmbed) {
 			const text = await fs.readFile(join(__dirname, '..', '..', 'assets', 'embeds', 'help.txt'), {
 				encoding: 'utf8',
@@ -47,3 +47,4 @@ class HelpCommand extends Command {
 }
 
 module.exports = HelpCommand;
+*/

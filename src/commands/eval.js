@@ -34,7 +34,7 @@ class EvalCommand extends Command {
 	}
 
 	/** @param ctx {import('../structures/EnhancedCommandContext')} */
-	async run(ctx) {
+	async exec(ctx) {
 		const { async, silent } = ctx.options;
 		const code = async
 			? `(async () => {
@@ -63,9 +63,8 @@ class EvalCommand extends Command {
 		if (typeof text !== 'string') text = inspect(text);
 
 		const cleaned = text.replaceAll(this.client.token, '[token]').replaceAll('`', '`\u200b');
-		const result = `\`\`\`js\n${cleaned}\n\`\`\``;
-		if (result.length > 1900) return `${result.slice(0, 1900)}...`;
-		return result;
+		if (cleaned.length > 1900) return `\`\`\`js\n${cleaned.slice(0, 1900)}...\`\`\``;
+		return `\`\`\`js\n${cleaned}\`\`\``;
 	}
 }
 

@@ -16,8 +16,7 @@ RUN apk add --update \
 	fontconfig ttf-dejavu ttf-droid ttf-freefont ttf-liberation ttf-opensans ttf-ubuntu-font-family \
 	dumb-init \
 	&& curl -L https://unpkg.com/@pnpm/self-installer | node \
-	&& git clone https://github.com/vishnubob/wait-for-it.git \
-	&& apk del .build-deps
+	&& git clone https://github.com/vishnubob/wait-for-it.git
 
 COPY . .
 

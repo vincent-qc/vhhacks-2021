@@ -1,58 +1,121 @@
 // @ts-check
 const { CommandContext } = require('slash-create');
 
-class EnhancedCommandContext extends CommandContext {
-	constructor(...args) {
+class EnhancedCommandContext {
+	/** @param {CommandContext} ctx */
+	constructor(ctx) {
+		this._ctx = ctx;
+
+		/** @type {import('../client/SchoolmasterClient')} */
 		// @ts-expect-error
-		super(...args);
+		this.client = ctx.creator.client;
+		this.guild = ctx.guildID ? this.client.guilds.cache.get(ctx.guildID) : null;
+		this.channel = this.guild.channels.cache.get(ctx.channelID);
+		this.userID = ctx.user.id;
+
+		this.creator = ctx.creator;
+		this.data = ctx.data;
+		this.interactionToken = ctx.interactionToken;
+		this.interactionID = ctx.interactionID;
+		this.channelID = ctx.channelID;
+		this.guildID = ctx.guildID;
+		this.commandName = ctx.commandName;
+		this.commandID = ctx.commandID;
+		this.options = ctx.options;
+		this.subcommands = ctx.subcommands;
+		this.invokedAt = ctx.invokedAt;
 	}
 
-	/** @returns {import('../client/SchoolmasterClient')} */
-	get client() {
-		// @ts-expect-error
-		return this.creator.client;
+	get expired() {
+		return this._ctx.expired;
 	}
 
-	get _guild() {
-		if (!this.guildID) return null;
-		return this.client.guilds.cache.get(this.guildID);
+	get deferred() {
+		return this._ctx.deferred;
 	}
 
-	get _channel() {
-		return this._guild.channels.cache.get(this.channelID);
+	get initiallyResponded() {
+		return this._ctx.initiallyResponded;
 	}
 
-	async getMember() {
-		if (!this.member) return null;
-		return this._guild.members.fetch(this.member.id);
+	/**
+	 * @param {Parameters<CommandContext['send']>[0]} content
+	 * @param {Parameters<CommandContext['send']>[1]} [options]
+	 */
+	send(content, options) {
+		return this._ctx.send(content, options);
 	}
 
-	async getUser() {
-		return this.client.users.fetch(this.user.id);
+	/**
+	 * @param {Parameters<CommandContext['sendFollowUp']>[0]} content
+	 * @param {Parameters<CommandContext['sendFollowUp']>[1]} [options]
+	 */
+	sendFollowUp(content, options) {
+		return this._ctx.sendFollowUp(content, options);
 	}
 
-	async getMemberOption(option) {
-		const member = this.members.get(option);
-		if (!member) return null;
-		return this._guild.members.fetch(member.id);
+	/**
+	 * @param {Parameters<CommandContext['edit']>[0]} messageID
+	 * @param {Parameters<CommandContext['edit']>[1]} content
+	 * @param {Parameters<CommandContext['edit']>[2]} [options]
+	 */
+	edit(messageID, content, options) {
+		return this._ctx.edit(messageID, content, options);
 	}
 
-	getRoleOption(option) {
-		const role = this.roles.get(option);
-		if (!role) return null;
-		return this._guild.roles.cache.get(role.id);
+	/**
+	 * @param {Parameters<CommandContext['editOriginal']>[0]} content
+	 * @param {Parameters<CommandContext['editOriginal']>[1]} [options]
+	 */
+	editOriginal(content, options) {
+		return this._ctx.editOriginal(content, options);
+	}
+
+	/** @param {string | undefined} messageID */
+	delete(messageID) {
+		return this._ctx.delete(messageID);
+	}
+
+	/** @param {boolean | undefined} ephemeral */
+	defer(ephemeral) {
+		return this._ctx.defer(ephemeral);
+	}
+
+	async fetchMember() {
+		if (!this._ctx.member) return null;
+		return this.guild.members.fetch(this._ctx.member.id);
+	}
+
+	async fetchUser() {
+		return this.client.users.fetch(this._ctx.user.id);
 	}
 
 	getChannelOption(option) {
-		const channel = this.channels.get(option);
-		if (!channel) return null;
-		return this._guild.channels.cache.get(channel.id);
+		const id = this._ctx.options[option];
+		if (!id) return null;
+		// @ts-expect-error
+		return this.guild.channels.cache.get(id);
 	}
 
-	getUserOption(option) {
-		const user = this.users.get(option);
-		if (!user) return null;
-		return this.client.users.fetch(user.id);
+	getRoleOption(option) {
+		const id = this._ctx.options[option];
+		if (!id) return null;
+		// @ts-expect-error
+		return this.guild.roles.cache.get(id);
+	}
+
+	async fetchMemberOption(option) {
+		const id = this._ctx.options[option];
+		if (!id) return null;
+		// @ts-expect-error
+		return this.guild.members.fetch(id);
+	}
+
+	async fetchUserOption(option) {
+		const id = this._ctx.options[option];
+		if (!id) return null;
+		// @ts-expect-error
+		return this.client.users.fetch(id);
 	}
 }
 

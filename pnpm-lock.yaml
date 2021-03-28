@@ -4,6 +4,7 @@ dependencies:
   '@skyra/char': 1.0.1
   canvas: 2.7.0
   canvas-constructor: 4.1.0_canvas@2.7.0
+  colornames: 1.1.1
   denque: 1.5.0
   discord.js: 12.5.1_@discordjs+opus@0.5.0
   postgres: 1.0.2
@@ -304,6 +305,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
+  /colornames/1.1.1:
+    dev: false
+    resolution:
+      integrity: sha1-+IiQMGhcfE/54qVZ9Qd+t2qBb5Y=
   /combined-stream/1.0.8:
     dependencies:
       delayed-stream: 1.0.0
@@ -1262,6 +1267,7 @@ specifiers:
   '@skyra/char': ^1.0.1
   canvas: ^2.7.0
   canvas-constructor: ^4.1.0
+  colornames: ^1.1.1
   denque: ^1.5.0
   discord.js: ^12.5.1
   postgres: ^1.0.2
