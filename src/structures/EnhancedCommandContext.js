@@ -10,7 +10,7 @@ class EnhancedCommandContext {
 		// @ts-expect-error
 		this.client = ctx.creator.client;
 		this.guild = ctx.guildID ? this.client.guilds.cache.get(ctx.guildID) : null;
-		this.channel = this.guild.channels.cache.get(ctx.channelID);
+		this.channel = this.guild?.channels.cache.get(ctx.channelID) ?? null;
 		this.userID = ctx.user.id;
 
 		this.creator = ctx.creator;

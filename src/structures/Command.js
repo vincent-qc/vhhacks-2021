@@ -34,7 +34,7 @@ class Command extends SlashCommand {
 
 	/** @param ctx {EnhancedCommandContext} */
 	async runInhibitors(ctx) {
-		// Block if no guild
+		// Block if no guild...
 		if (!ctx.guildID) {
 			ctx.send(`${Emojis.ERROR} This command may only be used in a guild.`, { ephemeral: true });
 			return true;
