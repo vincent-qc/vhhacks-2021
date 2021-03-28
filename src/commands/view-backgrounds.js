@@ -54,6 +54,7 @@ class ViewBackgroundsCommand extends Command {
 
 	generatePage(page) {
 		const index = page - 1;
+		if (index >= imageIDs.length) return undefined;
 		const id = imageIDs[index];
 		return new MessageEmbed()
 			.setTitle('Available backgrounds')

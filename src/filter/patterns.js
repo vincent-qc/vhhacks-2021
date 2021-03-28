@@ -24,6 +24,11 @@ const patterns = [
 		patterns: ['|ass'],
 	},
 	{
+		name: 'cunt',
+		kind: SwearKind.DEROGATORY,
+		patterns: ['cunt'],
+	},
+	{
 		name: 'bitch',
 		kind: SwearKind.DEROGATORY,
 		patterns: ['bitch'],

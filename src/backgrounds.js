@@ -3,7 +3,7 @@ const { resolveImage } = require('canvas-constructor');
 const { join } = require('path');
 
 const bgLinks = {
-	0: 'https://i.imgur.com/i6qQInM.png',
+	0: 'https://i.imgur.com/JK8dSfB.png',
 	1: 'https://i.imgur.com/994lcbQ.png',
 	2: 'https://i.imgur.com/ME3vZzY.png',
 	3: 'https://i.imgur.com/lbRGKkW.png',

@@ -53,7 +53,6 @@ class RankCommand extends Command {
 		const bgImage = this.bgImages[backgroundID];
 
 		const color = '#' + (results[0]?.color?.toString(16).padStart(6, 0) ?? RankCommand.DEFAULT_COLOR);
-		console.log(color);
 		const reputation = results[0]?.reputation ?? 0;
 		const formattedReputation = formatInt(reputation);
 
@@ -64,12 +63,14 @@ class RankCommand extends Command {
 		const levelRep = reputation - getReputation(currentLevel);
 		const totalLevelRep = getReputation(currentLevel + 1);
 
+		console.log('levelrepL: ' + levelRep.toString() + '    totalrep: ' + totalLevelRep.toString());
+
 		const barLength = 40 + (levelRep / totalLevelRep) * 534;
 
 		const card = await new Canvas(1000, 380)
 			.createRoundedClip(0, 0, 1000, 380, 30)
 			.printImage(bgImage, 0, 0, 1000, 380) // Background
-			.setGlobalAlpha(0.5)
+			.setGlobalAlpha(0.6)
 			.setColor('#303030')
 			.beginPath() // Create Bar BG
 			.createRoundedPath(370, 301, 590, 52, 50)
@@ -93,9 +94,10 @@ class RankCommand extends Command {
 			.printText('LEVEL', 390, 215)
 			.measureText(formattedReputation, (size, canvas) => canvas.printText(formattedReputation, 960 - size.width, 260))
 			.measureText(currentLevel.toString(), (size, canvas) => {
-				return canvas.printText(currentLevel.toString(), 960 - size.width, 215);
+				return canvas.printText((currentLevel + 1).toString(), 960 - size.width, 215);
 			})
 			//.createCircularClip(190, 190, 150)
+			.setGlobalAlpha(1)
 			.createRoundedClip(40, 40, 300, 300, 30) // Clip + PFP
 			.printImage(pfp, 40, 40, 300, 300)
 			.toBufferAsync();
