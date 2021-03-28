@@ -12,4 +12,3 @@
 ## Credits
 
 - Created by Vincent Qi and Joseph Liu
-- [Discord Dashboard Template](https://github.com/MrAugu/simple-discordjs-dashboard)
